@@ -1,0 +1,148 @@
+/* Main Styles for Business Cycle Tracker */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: #f8f9fa;
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+}
+
+canvas {
+    width: 100% !important;
+}
+
+/* Set a fixed height for chart containers */
+#m2Chart, #ismChart, #bitcoinChart, #nasdaqChart, 
+#bitcoinYoYChart, #nasdaqYoYChart {
+    height: 300px !important;
+}
+
+/* Set a reasonable height for the overlay charts */
+#overlayChart {
+    height: 400px !important;
+}
+
+#correlationChart {
+    height: 280px !important;
+}
+
+footer {
+    margin-top: 50px;
+}
+
+/* Chart container styling */
+.chart-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    padding-bottom: 20px; /* Add padding to prevent axis labels from being cut off */
+}
+
+/* Card body spacing for charts */
+.card-body {
+    padding: 1.25rem 1.25rem 1.5rem;
+}
+
+/* Form controls */
+.form-select, .form-control {
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    transform: translateY(-2px);
+}
+
+/* Tooltip customization */
+.chart-tooltip {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Custom chart label styling */
+.chart-label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    #overlayChart {
+        height: 300px !important;
+    }
+    
+    #correlationChart {
+        height: 250px !important;
+    }
+}
+
+/* Range slider styling */
+.form-range::-webkit-slider-thumb {
+    background: #0d6efd;
+}
+
+.form-range::-moz-range-thumb {
+    background: #0d6efd;
+}
+
+/* Time shift value display */
+#timeShiftValue {
+    font-weight: 600;
+    margin-top: 5px;
+    color: #0d6efd;
+}
+
+/* Card for correlation chart - ensure it has enough vertical space */
+.card-body.correlation-chart-container {
+    min-height: 300px;
+} 
