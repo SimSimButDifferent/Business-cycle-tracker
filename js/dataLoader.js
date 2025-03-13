@@ -16,11 +16,13 @@ class DataLoader {
       nasdaq: null,
       nasdaq_yoy: null,
       spx: null,
+      unemployment: null,
+      yield_curve: null,
     };
 
     this.loadingPromises = [];
 
-    // Hard-coded data to avoid CORS issues with local files
+    // Hard-coded data to use as fallback if JSON loading fails
     this.embedded_data = {};
   }
 
@@ -29,7 +31,7 @@ class DataLoader {
    * @returns {Promise} A promise that resolves when all data is loaded
    */
   loadAllData() {
-    // Load embedded data from JSON files
+    // Set up the embedded data as fallback
     this.loadEmbeddedData();
 
     // Create an array of loading promises for each dataset
@@ -63,6 +65,7 @@ class DataLoader {
     // Load each dataset from the embedded data
     this.embedded_data = {
       // Global M2 Money Supply - More complete dataset
+
       global_m2: [
         { date: "1992-01-01", value: 1025.46 },
         { date: "1992-06-01", value: 1052.31 },
@@ -703,24 +706,83 @@ class DataLoader {
   }
 
   /**
-   * Load a dataset from embedded data
+   * Load a dataset from local JSON file or embedded data
    * @param {string} datasetName - The name of the dataset
    * @returns {Promise} A promise that resolves when the data is loaded
    */
   loadLocalDataset(datasetName) {
     return new Promise((resolve, reject) => {
-      try {
-        // Get data from embedded_data, or use sample data as a fallback
+      // Map datasetName to the actual file name
+      const fileMap = {
+        global_m2: "global_m2.json",
+        ism_manufacturing: "ism_manufacturing.json",
+        ism_services: "ism_services.json",
+        bitcoin: "bitcoin_price.json",
+        nasdaq: "nasdaq_index.json",
+        unemployment: "unemployment_rate.json",
+        yield_curve: "yield_curve.json",
+      };
+
+      const fileName = fileMap[datasetName];
+
+      if (!fileName) {
+        console.warn(
+          `No file mapping for ${datasetName}, using embedded data.`
+        );
         const data =
           this.embedded_data[datasetName] || this.getSampleData(datasetName);
         this.datasets[datasetName] = this.processDataset(data, datasetName);
         resolve(this.datasets[datasetName]);
-      } catch (error) {
-        console.error(`Error loading ${datasetName}:`, error);
-        // Use sample data if loading fails
-        this.datasets[datasetName] = this.getSampleData(datasetName);
-        resolve(this.datasets[datasetName]);
+        return;
       }
+
+      console.log(`Attempting to fetch ${datasetName} from data/${fileName}`);
+
+      // Try to fetch the JSON file
+      fetch(`data/${fileName}`)
+        .then((response) => {
+          if (!response.ok) {
+            console.error(
+              `Failed to load ${fileName}: HTTP ${response.status} ${response.statusText}`
+            );
+            throw new Error(
+              `Failed to load ${fileName}: ${response.status} ${response.statusText}`
+            );
+          }
+          console.log(`Successfully fetched ${fileName}, now parsing JSON...`);
+          return response.json();
+        })
+        .then((data) => {
+          if (!data || !Array.isArray(data)) {
+            console.error(`Invalid data format for ${fileName}:`, data);
+            throw new Error(`Invalid data format for ${fileName}`);
+          }
+
+          console.log(
+            `Successfully loaded ${datasetName} from JSON file with ${data.length} data points`
+          );
+          console.log(`Sample data (first 3 items):`, data.slice(0, 3));
+
+          this.datasets[datasetName] = this.processDataset(data, datasetName);
+          resolve(this.datasets[datasetName]);
+        })
+        .catch((error) => {
+          console.warn(`Error loading ${datasetName} from file:`, error);
+          console.warn(`Falling back to embedded data for ${datasetName}`);
+
+          // Use embedded data as fallback
+          const fallbackData =
+            this.embedded_data[datasetName] || this.getSampleData(datasetName);
+          console.log(
+            `Using ${fallbackData.length} fallback data points for ${datasetName}`
+          );
+
+          this.datasets[datasetName] = this.processDataset(
+            fallbackData,
+            datasetName
+          );
+          resolve(this.datasets[datasetName]);
+        });
     });
   }
 
@@ -914,33 +976,55 @@ class DataLoader {
     // Sort by date ascending
     processedDataset.sort((a, b) => a.date - b.date);
 
+    // If timeframe is "all" return the full dataset right away
+    if (timeframe === "all") {
+      console.log("Returning full dataset (all timeframe)");
+      return processedDataset;
+    }
+
+    // Get the most recent date in the dataset
+    const mostRecentDate =
+      processedDataset.length > 0
+        ? new Date(processedDataset[processedDataset.length - 1].date)
+        : new Date();
+
     // Current date to calculate relative timeframes
     const now = new Date();
+
+    // Decide whether to use current date or most recent data date
+    // If data is more than 90 days old, use the data's most recent date instead
+    const dataAge = (now - mostRecentDate) / (1000 * 60 * 60 * 24);
+    const referenceDate = dataAge > 90 ? mostRecentDate : now;
+
+    console.log(
+      `Reference date for filtering: ${referenceDate.toISOString()} (${dataAge.toFixed(
+        1
+      )} days old)`
+    );
 
     // Define cutoff date based on timeframe
     let cutoffDate;
 
     switch (timeframe) {
       case "1year":
-        cutoffDate = new Date(now);
-        cutoffDate.setFullYear(now.getFullYear() - 1);
+        cutoffDate = new Date(referenceDate);
+        cutoffDate.setFullYear(referenceDate.getFullYear() - 1);
         break;
       case "5years":
-        cutoffDate = new Date(now);
-        cutoffDate.setFullYear(now.getFullYear() - 5);
+        cutoffDate = new Date(referenceDate);
+        cutoffDate.setFullYear(referenceDate.getFullYear() - 5);
         break;
       case "10years":
-        cutoffDate = new Date(now);
-        cutoffDate.setFullYear(now.getFullYear() - 10);
+        cutoffDate = new Date(referenceDate);
+        cutoffDate.setFullYear(referenceDate.getFullYear() - 10);
         break;
       case "20years":
-        cutoffDate = new Date(now);
-        cutoffDate.setFullYear(now.getFullYear() - 20);
+        cutoffDate = new Date(referenceDate);
+        cutoffDate.setFullYear(referenceDate.getFullYear() - 20);
         break;
-      case "all":
       default:
-        // Return the full dataset
-        console.log("Returning full dataset (all timeframe)");
+        // This should not happen
+        console.log("Unknown timeframe, returning full dataset");
         return processedDataset;
     }
 
@@ -954,6 +1038,16 @@ class DataLoader {
     console.log(
       `Filtered dataset has ${filtered.length} items (from ${dataset.length})`
     );
+
+    // If we have no data after filtering (rare edge case), return at least the most recent data
+    if (filtered.length === 0 && processedDataset.length > 0) {
+      console.warn(
+        `No data in the ${timeframe} timeframe, returning most recent data points`
+      );
+      // Return the most recent 12 points or all if less than 12
+      const pointsToReturn = Math.min(12, processedDataset.length);
+      return processedDataset.slice(-pointsToReturn);
+    }
 
     return filtered;
   }
