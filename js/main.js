@@ -642,14 +642,23 @@ function initializeBitcoinYoYChart(bitcoinYoYData) {
             label: function (context) {
               // Find the original value from our data array
               const index = context.dataIndex;
-              const originalValue = bitcoinYoYData[index].value;
+
+              // Get the value from original data (either from initialization or updates)
+              const chart = context.chart;
+              const originalValue = chart.bitcoinYoYOriginalData
+                ? chart.bitcoinYoYOriginalData[index]?.value
+                : bitcoinYoYData[index]?.value;
 
               if (
                 originalValue !== null &&
                 originalValue !== undefined &&
                 !isNaN(originalValue)
               ) {
-                return `${context.dataset.label}: ${originalValue.toFixed(2)}%`;
+                // Format value with appropriate sign and fixed decimal places
+                const sign = originalValue >= 0 ? "+" : "";
+                return `${
+                  context.dataset.label
+                }: ${sign}${originalValue.toFixed(2)}%`;
               } else {
                 return `${context.dataset.label}: N/A`;
               }
@@ -668,6 +677,9 @@ function initializeBitcoinYoYChart(bitcoinYoYData) {
 
   // Create the chart
   chartConfig.bitcoinYoYChart = new Chart(ctx, config);
+
+  // Store the original data for tooltip access
+  chartConfig.bitcoinYoYChart.bitcoinYoYOriginalData = bitcoinYoYData;
 }
 
 /**
@@ -853,6 +865,9 @@ function updateChartData(chart, newData) {
     chart.data.datasets[0].data = transformedData.map(
       (item) => item.displayValue
     );
+
+    // Store the original data in a custom property for tooltip access
+    chart.bitcoinYoYOriginalData = newData;
   } else {
     chart.data.labels = newData.map((item) => item.date);
     chart.data.datasets[0].data = newData.map((item) => item.value);
