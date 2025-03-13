@@ -711,77 +711,79 @@ class DataLoader {
    * @returns {Promise} A promise that resolves when the data is loaded
    */
   loadLocalDataset(datasetName) {
+    // Add a timestamp parameter to prevent browser caching
+    const cacheBuster = `?t=${new Date().getTime()}`;
+
+    // Map dataset names to actual file names
+    const fileMap = {
+      global_m2: "global_m2.json",
+      ism_manufacturing: "ism_manufacturing.json",
+      ism_services: "ism_services.json",
+      bitcoin: "bitcoin_price.json",
+      bitcoin_yoy: "bitcoin_yoy.json",
+      nasdaq: "nasdaq.json", // Updated to use the new file
+      nasdaq_yoy: "nasdaq_yoy.json",
+      unemployment: "unemployment_rate.json",
+      yield_curve: "yield_curve.json",
+    };
+
+    const fileName = fileMap[datasetName] || `${datasetName}.json`;
+    const url = `data/${fileName}${cacheBuster}`;
+
+    console.log(`Loading ${datasetName} from ${url}`);
+
     return new Promise((resolve, reject) => {
-      // Map datasetName to the actual file name
-      const fileMap = {
-        global_m2: "global_m2.json",
-        ism_manufacturing: "ism_manufacturing.json",
-        ism_services: "ism_services.json",
-        bitcoin: "bitcoin_price.json",
-        nasdaq: "nasdaq_index.json",
-        unemployment: "unemployment_rate.json",
-        yield_curve: "yield_curve.json",
-      };
-
-      const fileName = fileMap[datasetName];
-
-      if (!fileName) {
-        console.warn(
-          `No file mapping for ${datasetName}, using embedded data.`
-        );
-        const data =
-          this.embedded_data[datasetName] || this.getSampleData(datasetName);
-        this.datasets[datasetName] = this.processDataset(data, datasetName);
-        resolve(this.datasets[datasetName]);
-        return;
-      }
-
-      console.log(`Attempting to fetch ${datasetName} from data/${fileName}`);
-
-      // Try to fetch the JSON file
-      fetch(`data/${fileName}`)
+      fetch(url)
         .then((response) => {
           if (!response.ok) {
-            console.error(
-              `Failed to load ${fileName}: HTTP ${response.status} ${response.statusText}`
-            );
-            throw new Error(
-              `Failed to load ${fileName}: ${response.status} ${response.statusText}`
-            );
+            if (response.status === 404) {
+              // If not found (404), try to get sample data
+              console.log(
+                `Data file for ${datasetName} not found, using sample data`
+              );
+              const sampleData = this.getSampleData(datasetName);
+              if (sampleData) {
+                resolve(sampleData);
+              } else {
+                reject(
+                  new Error(`No sample data available for ${datasetName}`)
+                );
+              }
+            } else {
+              // For other HTTP errors, reject with error
+              reject(
+                new Error(
+                  `HTTP error ${response.status} when loading ${datasetName}`
+                )
+              );
+            }
+          } else {
+            // If response is OK, parse the JSON data
+            return response.json();
           }
-          console.log(`Successfully fetched ${fileName}, now parsing JSON...`);
-          return response.json();
         })
         .then((data) => {
-          if (!data || !Array.isArray(data)) {
-            console.error(`Invalid data format for ${fileName}:`, data);
-            throw new Error(`Invalid data format for ${fileName}`);
+          if (data) {
+            // If data was successfully fetched and parsed, resolve with it
+            this.datasets[datasetName] = this.processDataset(data, datasetName);
+            resolve(this.datasets[datasetName]);
           }
-
-          console.log(
-            `Successfully loaded ${datasetName} from JSON file with ${data.length} data points`
-          );
-          console.log(`Sample data (first 3 items):`, data.slice(0, 3));
-
-          this.datasets[datasetName] = this.processDataset(data, datasetName);
-          resolve(this.datasets[datasetName]);
         })
         .catch((error) => {
-          console.warn(`Error loading ${datasetName} from file:`, error);
-          console.warn(`Falling back to embedded data for ${datasetName}`);
+          console.error(`Error fetching ${datasetName} data:`, error);
 
-          // Use embedded data as fallback
-          const fallbackData =
-            this.embedded_data[datasetName] || this.getSampleData(datasetName);
-          console.log(
-            `Using ${fallbackData.length} fallback data points for ${datasetName}`
-          );
-
-          this.datasets[datasetName] = this.processDataset(
-            fallbackData,
-            datasetName
-          );
-          resolve(this.datasets[datasetName]);
+          // Try to get sample data on error
+          const sampleData = this.getSampleData(datasetName);
+          if (sampleData) {
+            console.log(`Using sample data for ${datasetName}`);
+            this.datasets[datasetName] = this.processDataset(
+              sampleData,
+              datasetName
+            );
+            resolve(this.datasets[datasetName]);
+          } else {
+            reject(error);
+          }
         });
     });
   }

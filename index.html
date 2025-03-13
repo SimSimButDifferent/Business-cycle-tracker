@@ -142,11 +142,11 @@
         <div class="col-md-6 mb-4">
           <div class="card">
             <div class="card-header">
-              <h5>Bitcoin Price</h5>
+              <h5>Yield Curve Spread (10Y-2Y)</h5>
             </div>
             <div class="card-body">
               <div class="chart-container">
-                <canvas id="bitcoinChart"></canvas>
+                <canvas id="yieldCurveChart"></canvas>
               </div>
             </div>
           </div>
@@ -154,11 +154,11 @@
         <div class="col-md-6 mb-4">
           <div class="card">
             <div class="card-header">
-              <h5>NASDAQ Price</h5>
+              <h5>Unemployment Rate</h5>
             </div>
             <div class="card-body">
               <div class="chart-container">
-                <canvas id="nasdaqChart"></canvas>
+                <canvas id="unemploymentChart"></canvas>
               </div>
             </div>
           </div>
@@ -191,10 +191,42 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <h5>Bitcoin Price</h5>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="bitcoinChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <h5>NASDAQ Price</h5>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="nasdaqChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <footer class="bg-dark text-white text-center p-3 mt-5">
-      <p>Business Cycle Tracker - Open Source Dashboard</p>
+      <p>
+        Business Cycle Tracker - Open Source Dashboard -
+        <a href="https://github.com/SimSimButDifferent"
+          >SimSimButDifferent@Github</a
+        >
+      </p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>

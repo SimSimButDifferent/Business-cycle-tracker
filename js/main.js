@@ -12,6 +12,8 @@ const chartConfig = {
   nasdaqChart: null,
   bitcoinYoYChart: null,
   nasdaqYoYChart: null,
+  yieldCurveChart: null,
+  unemploymentChart: null,
 };
 
 // Current dashboard settings
@@ -39,6 +41,17 @@ const chartColors = {
   nasdaq: {
     line: "rgba(75, 192, 192, 1)",
     fill: "rgba(75, 192, 192, 0.2)",
+  },
+  yieldCurve: {
+    line: "rgba(75, 192, 192, 1)",
+    fill: "rgba(75, 192, 192, 0.2)",
+    threshold: {
+      line: "rgba(220, 53, 69, 0.5)",
+    },
+  },
+  unemployment: {
+    line: "rgba(153, 102, 255, 1)",
+    fill: "rgba(153, 102, 255, 0.2)",
   },
 };
 
@@ -160,6 +173,12 @@ function initializeCharts() {
 
   // Initialize ISM Manufacturing PMI chart
   initializeISMChart(filteredDatasets.ism_manufacturing);
+
+  // Initialize Yield Curve chart
+  initializeYieldCurveChart(filteredDatasets.yield_curve);
+
+  // Initialize Unemployment chart
+  initializeUnemploymentChart(filteredDatasets.unemployment);
 
   // Initialize Bitcoin Price chart
   initializeBitcoinChart(filteredDatasets.bitcoin);
@@ -787,6 +806,215 @@ function initializeNasdaqYoYChart(nasdaqYoYData) {
 }
 
 /**
+ * Initialize the Yield Curve Spread chart
+ * @param {Array} yieldCurveData - The yield curve spread dataset
+ */
+function initializeYieldCurveChart(yieldCurveData) {
+  const ctx = document.getElementById("yieldCurveChart").getContext("2d");
+
+  // Prepare the data for Chart.js
+  const chartData = {
+    labels: yieldCurveData.map((item) => item.date),
+    datasets: [
+      {
+        label: "Yield Curve Spread (10Y-2Y)",
+        data: yieldCurveData.map((item) => item.value),
+        borderColor: chartColors.yieldCurve.line,
+        backgroundColor: chartColors.yieldCurve.fill,
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 1,
+        pointHoverRadius: 5,
+      },
+    ],
+  };
+
+  // Chart configuration
+  const config = {
+    type: "line",
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: "time",
+          time: {
+            unit: "year",
+            displayFormats: {
+              year: "yyyy",
+            },
+          },
+          title: {
+            display: true,
+            text: "Date",
+          },
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Spread (%)",
+          },
+          suggestedMin: -2,
+          suggestedMax: 3,
+        },
+      },
+      plugins: {
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || "";
+              if (label) {
+                label += ": ";
+              }
+
+              const value = context.parsed.y;
+              label += value.toFixed(2) + "%";
+
+              // Add interpretation of yield curve
+              if (value <= 0) {
+                label += " (Inverted - Recession Signal)";
+              } else if (value < 0.5) {
+                label += " (Flattening - Caution)";
+              } else {
+                label += " (Normal)";
+              }
+
+              return label;
+            },
+          },
+        },
+        legend: {
+          position: "top",
+        },
+        title: {
+          display: false,
+        },
+        annotation: {
+          annotations: {
+            line0: {
+              type: "line",
+              yMin: 0,
+              yMax: 0,
+              borderColor: chartColors.yieldCurve.threshold.line,
+              borderWidth: 2,
+              borderDash: [5, 5],
+              label: {
+                content: "Inversion Threshold (0%)",
+                enabled: true,
+                position: "end",
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  // Create the chart
+  chartConfig.yieldCurveChart = new Chart(ctx, config);
+}
+
+/**
+ * Initialize the Unemployment Rate chart
+ * @param {Array} unemploymentData - The unemployment rate dataset
+ */
+function initializeUnemploymentChart(unemploymentData) {
+  const ctx = document.getElementById("unemploymentChart").getContext("2d");
+
+  // Prepare the data for Chart.js
+  const chartData = {
+    labels: unemploymentData.map((item) => item.date),
+    datasets: [
+      {
+        label: "Unemployment Rate (%)",
+        data: unemploymentData.map((item) => item.value),
+        borderColor: chartColors.unemployment.line,
+        backgroundColor: chartColors.unemployment.fill,
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 1,
+        pointHoverRadius: 5,
+      },
+    ],
+  };
+
+  // Chart configuration
+  const config = {
+    type: "line",
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: "time",
+          time: {
+            unit: "year",
+            displayFormats: {
+              year: "yyyy",
+            },
+          },
+          title: {
+            display: true,
+            text: "Date",
+          },
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Rate (%)",
+          },
+          suggestedMin: 0,
+          suggestedMax: 12,
+        },
+      },
+      plugins: {
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || "";
+              if (label) {
+                label += ": ";
+              }
+
+              const value = context.parsed.y;
+              label += value.toFixed(1) + "%";
+
+              // Add interpretation of unemployment rate
+              if (value < 4) {
+                label += " (Low)";
+              } else if (value > 7) {
+                label += " (High)";
+              } else {
+                label += " (Moderate)";
+              }
+
+              return label;
+            },
+          },
+        },
+        legend: {
+          position: "top",
+        },
+        title: {
+          display: false,
+        },
+      },
+    },
+  };
+
+  // Create the chart
+  chartConfig.unemploymentChart = new Chart(ctx, config);
+}
+
+/**
  * Update all charts on the dashboard with the current timeframe
  */
 function updateAllCharts() {
@@ -819,6 +1047,17 @@ function updateAllCharts() {
 
   if (chartConfig.ismChart) {
     updateChartData(chartConfig.ismChart, filteredDatasets.ism_manufacturing);
+  }
+
+  if (chartConfig.yieldCurveChart) {
+    updateChartData(chartConfig.yieldCurveChart, filteredDatasets.yield_curve);
+  }
+
+  if (chartConfig.unemploymentChart) {
+    updateChartData(
+      chartConfig.unemploymentChart,
+      filteredDatasets.unemployment
+    );
   }
 
   if (chartConfig.bitcoinChart) {

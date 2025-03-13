@@ -82,38 +82,10 @@
                     <option value="bitcoin">Bitcoin</option>
                   </select>
                 </div>
-                <div class="col-md-3">
-                  <label for="overlayMetric" class="form-label"
-                    >Overlay Metric:</label
-                  >
-                  <select id="overlayMetric" class="form-select">
-                    <option value="global_m2">Global M2 Money Supply</option>
-                    <option value="ism_manufacturing">
-                      ISM Manufacturing PMI
-                    </option>
-                    <option value="ism_services">ISM Services PMI</option>
-                    <option value="yield_curve">Yield Curve Spread</option>
-                    <option value="unemployment">Unemployment Rate</option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label for="timeShift" class="form-label"
-                    >Time Shift (months):</label
-                  >
-                  <input
-                    type="range"
-                    class="form-range"
-                    id="timeShift"
-                    min="-24"
-                    max="24"
-                    value="0"
-                  />
-                  <div class="text-center" id="timeShiftValue">0 months</div>
-                </div>
-                <div class="col-md-3">
-                  <label for="timeframe" class="form-label">Timeframe:</label>
+                <div class="col-md-9">
+                  <label class="form-label">Timeframe:</label>
                   <div
-                    class="btn-group-vertical w-100"
+                    class="btn-group w-100"
                     role="group"
                     id="timeframeButtons"
                   >
@@ -155,11 +127,275 @@
                   </div>
                 </div>
               </div>
+
+              <div class="row mb-4">
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">Select Metrics to Display</h6>
+                    </div>
+                    <div class="card-body">
+                      <div id="metricsContainer">
+                        <!-- Metric selection items will be dynamically inserted here -->
+                        <div
+                          class="row metric-item mb-3 align-items-center"
+                          data-metric="global_m2"
+                        >
+                          <div class="col-md-3">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input metric-checkbox"
+                                type="checkbox"
+                                id="checkbox-global_m2"
+                                data-metric="global_m2"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="checkbox-global_m2"
+                              >
+                                <span
+                                  class="metric-color-indicator metric-color-global_m2"
+                                ></span>
+                                Global M2 Money Supply
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-md-7">
+                            <label class="form-label small mb-0"
+                              >Time Shift (months):</label
+                            >
+                            <input
+                              type="range"
+                              class="form-range metric-timeshift"
+                              min="-24"
+                              max="24"
+                              value="0"
+                              data-metric="global_m2"
+                            />
+                          </div>
+                          <div class="col-md-2">
+                            <span class="badge bg-secondary timeshift-value"
+                              >0 months</span
+                            >
+                          </div>
+                        </div>
+
+                        <div
+                          class="row metric-item mb-3 align-items-center"
+                          data-metric="ism_manufacturing"
+                        >
+                          <div class="col-md-3">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input metric-checkbox"
+                                type="checkbox"
+                                id="checkbox-ism_manufacturing"
+                                data-metric="ism_manufacturing"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="checkbox-ism_manufacturing"
+                              >
+                                <span
+                                  class="metric-color-indicator metric-color-ism_manufacturing"
+                                ></span>
+                                ISM Manufacturing PMI
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-md-7">
+                            <label class="form-label small mb-0"
+                              >Time Shift (months):</label
+                            >
+                            <input
+                              type="range"
+                              class="form-range metric-timeshift"
+                              min="-24"
+                              max="24"
+                              value="0"
+                              data-metric="ism_manufacturing"
+                            />
+                          </div>
+                          <div class="col-md-2">
+                            <span class="badge bg-secondary timeshift-value"
+                              >0 months</span
+                            >
+                          </div>
+                        </div>
+
+                        <div
+                          class="row metric-item mb-3 align-items-center"
+                          data-metric="ism_services"
+                        >
+                          <div class="col-md-3">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input metric-checkbox"
+                                type="checkbox"
+                                id="checkbox-ism_services"
+                                data-metric="ism_services"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="checkbox-ism_services"
+                              >
+                                <span
+                                  class="metric-color-indicator metric-color-ism_services"
+                                ></span>
+                                ISM Services PMI
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-md-7">
+                            <label class="form-label small mb-0"
+                              >Time Shift (months):</label
+                            >
+                            <input
+                              type="range"
+                              class="form-range metric-timeshift"
+                              min="-24"
+                              max="24"
+                              value="0"
+                              data-metric="ism_services"
+                            />
+                          </div>
+                          <div class="col-md-2">
+                            <span class="badge bg-secondary timeshift-value"
+                              >0 months</span
+                            >
+                          </div>
+                        </div>
+
+                        <div
+                          class="row metric-item mb-3 align-items-center"
+                          data-metric="yield_curve"
+                        >
+                          <div class="col-md-3">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input metric-checkbox"
+                                type="checkbox"
+                                id="checkbox-yield_curve"
+                                data-metric="yield_curve"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="checkbox-yield_curve"
+                              >
+                                <span
+                                  class="metric-color-indicator metric-color-yield_curve"
+                                ></span>
+                                Yield Curve Spread
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-md-7">
+                            <label class="form-label small mb-0"
+                              >Time Shift (months):</label
+                            >
+                            <input
+                              type="range"
+                              class="form-range metric-timeshift"
+                              min="-24"
+                              max="24"
+                              value="0"
+                              data-metric="yield_curve"
+                            />
+                          </div>
+                          <div class="col-md-2">
+                            <span class="badge bg-secondary timeshift-value"
+                              >0 months</span
+                            >
+                          </div>
+                        </div>
+
+                        <div
+                          class="row metric-item mb-3 align-items-center"
+                          data-metric="unemployment"
+                        >
+                          <div class="col-md-3">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input metric-checkbox"
+                                type="checkbox"
+                                id="checkbox-unemployment"
+                                data-metric="unemployment"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="checkbox-unemployment"
+                              >
+                                <span
+                                  class="metric-color-indicator metric-color-unemployment"
+                                ></span>
+                                Unemployment Rate
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-md-7">
+                            <label class="form-label small mb-0"
+                              >Time Shift (months):</label
+                            >
+                            <input
+                              type="range"
+                              class="form-range metric-timeshift"
+                              min="-24"
+                              max="24"
+                              value="0"
+                              data-metric="unemployment"
+                            />
+                          </div>
+                          <div class="col-md-2">
+                            <span class="badge bg-secondary timeshift-value"
+                              >0 months</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
                 <button id="updateChart" class="btn btn-primary">
                   Update Chart
                 </button>
               </div>
+
+              <!-- Economic Event Legend -->
+              <div class="card mb-3">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0">Economic Events Legend</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center mb-2">
+                        <span
+                          class="event-indicator event-recession me-2"
+                        ></span>
+                        <span>Recessions</span>
+                      </div>
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="event-indicator event-crisis me-2"></span>
+                        <span>Financial Crises</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="event-indicator event-policy me-2"></span>
+                        <span>Monetary Policy Events</span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="event-indicator event-market me-2"></span>
+                        <span>Market Events</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="chart-container">
                 <canvas id="overlayChart"></canvas>
               </div>
@@ -189,7 +425,12 @@
     </div>
 
     <footer class="bg-dark text-white text-center p-3 mt-5">
-      <p>Business Cycle Tracker - Open Source Dashboard</p>
+      <p>
+        Business Cycle Tracker - Open Source Dashboard -
+        <a href="https://github.com/SimSimButDifferent"
+          >SimSimButDifferent@Github</a
+        >
+      </p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
