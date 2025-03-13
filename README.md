@@ -2,7 +2,8 @@
 
 An open-source economic indicator dashboard for tracking business cycles and market correlations.
 
-![Business Cycle Tracker Dashboard](screenshots/dashboard.png)
+![Business Cycle Tracker Dashboard](https://github.com/user-attachments/assets/ae5ca62d-df81-4ec2-8a19-cf6db10a2fbf)
+
 
 ## Overview
 
